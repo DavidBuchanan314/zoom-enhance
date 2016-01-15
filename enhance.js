@@ -5,6 +5,11 @@ var ctx = c.getContext("2d");
 c.width = 512;
 c.height = 512;
 
+var logoCropHeight = 64;
+
+ctx.strokeStyle = "#0F0";
+ctx.strokeWidth = 3;
+
 var locationInput = document.getElementById("locationInput");
 var goBtn = document.getElementById("goBtn");
 
@@ -26,7 +31,7 @@ image.onload = function() {
 var loadImage = function() {
 	if (zoomLevel <= 20) {
 		drawGrid();
-		image.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + mapLocation + "&zoom=" + zoomLevel + "&size=" + c.width + "x" + (c.height + 64) + "&maptype=satellite"// TODO do this properly
+		image.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + mapLocation + "&zoom=" + zoomLevel + "&size=" + c.width + "x" + (c.height + logoCropHeight) + "&maptype=satellite"// TODO do this properly
 		zoomLevel += 2;
 	} else {
 		//done
@@ -49,8 +54,6 @@ goBtn.onclick = function() {
 };
 
 var drawGrid = function() {
-	ctx.strokeStyle = "#0F0";
-	ctx.strokeWidth = 3;
 	ctx.beginPath();
 	for (var x=1; x<segments; x++) {
 		ctx.moveTo(x*(c.width/segments), 0);
@@ -72,17 +75,17 @@ var renderLoop = function() {
 		var yPos = (c.height*y)/segments;
 		var width = c.width/segments;
 		var height = c.height/segments;
-		ctx.drawImage(image, xPos, yPos, width, height, xPos, yPos, width, height);
-		window.setTimeout(function(){window.requestAnimationFrame(renderLoop)}, 50);
+		ctx.drawImage(image, xPos, yPos+(logoCropHeight/2), width, height, xPos, yPos, width, height);
+		window.setTimeout(function(){window.requestAnimationFrame(renderLoop)}, 40);
 	} else if (zoomLoop < 4) {
 		zoomLoop += 0.05;
 		var width = image.width * zoomLoop;
 		var height = image.height * zoomLoop;
-		ctx.drawImage(image, (image.width-width)/2, (image.height-height)/2, width, height);
+		var rectSize = ((c.width*zoomLoop)/4)
+		ctx.drawImage(image, (image.width-width)/2, (c.height-height)/2, width, height);
+		ctx.strokeRect((c.width-rectSize)/2, (c.width-rectSize)/2, rectSize, rectSize);
 		window.requestAnimationFrame(renderLoop);
 	} else {
 		loadImage();
 	}
 }
-
-
